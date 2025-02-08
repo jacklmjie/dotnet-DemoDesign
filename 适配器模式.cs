@@ -12,40 +12,59 @@ namespace DesignMode
         [Fact]
         public void Test()
         {
-            Target target = new Adappter();
-            //其实请求的是适配后的接口了
-            target.Request();
+            var ba = new BirdAdapter(new Brid1());
+            ba.ShowType();
+            ba.ToTweet();
         }
-        /// <summary>
-        /// 通过在内部包装一个Adaptee对象，把源接口转换成目标接口
-        /// </summary>
-        class Adappter:Target
+
+        interface ITweetable
         {
-            private Adaptee adaptee = new Adaptee();
-            public override void Request()
+            void ToTweet();
+        }
+
+        public class BirdAdapter : ITweetable
+        {
+            private readonly Brid _brid;
+
+            public BirdAdapter(Brid brid)
             {
-                adaptee.SpecificRequest();
+                _brid = brid;
             }
-        }
-        /// <summary>
-        /// 需要适配的类
-        /// </summary>
-        class Adaptee
-        {
-            public void SpecificRequest()
+
+            public void ShowType()
             {
-                Console.WriteLine("特殊请求");
+                _brid.ShowType();
+            }
+
+            public void ToTweet()
+            {
+                //为不同的子类实现不同的ToTweet
             }
         }
 
-        /// <summary>
-        /// 这是客户所期待的接口。目标可以是具体的或抽象的类，也可以是接口
-        /// </summary>
-        class Target
+        public abstract class Brid
         {
-            public virtual void Request()
+            public abstract void ShowType();
+
+            //public virtual void ShowType()
+            //{
+            //    //virtual必须得有具体的实现，不然得用虚方法abstract
+            //}
+        }
+
+        public class Brid1 : Brid
+        {
+            public override void ShowType()
             {
-                Console.WriteLine("普通请求");
+                throw new NotImplementedException();
+            }
+        }
+
+        public class Brid2 : Brid
+        {
+            public override void ShowType()
+            {
+                throw new NotImplementedException();
             }
         }
     }

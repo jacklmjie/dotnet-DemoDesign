@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DemoDesign.其他;
+using System;
 using Xunit;
 
 namespace DesignMode
@@ -8,70 +9,72 @@ namespace DesignMode
     /// </summary>
     public class 代理模式
     {
-        [Fact(DisplayName = "代理")]
-        public void Test()
+        public interface IDBAction
         {
-            Proxy proxy = new Proxy();
-            proxy.Request();
-        }
-        [Fact(DisplayName = "代理运用")]
-        public void Test2()
-        {
-            Girl mm = new Girl();
-            mm.Name = "beautiful";
-            PursuitProxy proxy = new PursuitProxy(mm);
-            proxy.GiveFlowers();
+            void Add();
+            int Delete();
+            string GetPermission();
         }
 
-        abstract class Subject
+        public class DBManager : IDBAction
         {
-            public abstract void Request();
-        }
-        class RealSubject : Subject
-        {
-            public override void Request()
+            private readonly string _permisssion;
+
+            public DBManager(string permisssion)
             {
-                Console.WriteLine("真实的请求");
+                this._permisssion = permisssion;
+            }
+
+            public void Add()
+            {
+                throw new NotImplementedException();
+            }
+
+            public int Delete()
+            {
+                throw new NotImplementedException();
+            }
+
+            public string GetPermission()
+            {
+                return _permisssion;
             }
         }
-        class Proxy : Subject
+
+        public class DBManagerProxy : IDBAction
         {
-            RealSubject realSubject;
-            public override void Request()
+            private IDBAction _dBAction;
+            public DBManagerProxy(IDBAction dBAction)
             {
-                if (realSubject == null)
+                _dBAction = dBAction;
+            }
+
+            public string GetPermission()
+            {
+                return _dBAction.GetPermission();
+            }
+
+            public void Add()
+            {
+                if (GetPermission() == "CanAdd")
                 {
-                    realSubject = new RealSubject();
+                    _dBAction.Add();
                 }
-                realSubject.Request();
             }
-        }
 
-        interface IGiveGift
-        {
-            void GiveFlowers();
-        }
-        class Pursuit : IGiveGift
-        {
-            public void GiveFlowers()
+            public int Delete()
             {
                 throw new NotImplementedException();
             }
         }
-        class Girl
+
+        public class DBClient
         {
-            public string Name { get; set; }
-        }
-        class PursuitProxy : IGiveGift
-        {
-            Pursuit gg;
-            public PursuitProxy(Girl mm)
+            [Fact]
+            public void Test()
             {
-                gg = new Pursuit();
-            }
-            public void GiveFlowers()
-            {
-                gg.GiveFlowers();
+                IDBAction db = new DBManagerProxy(new DBManager("CanAdd"));
+                db.Add();
             }
         }
     }
